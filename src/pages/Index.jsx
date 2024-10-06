@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Pusula from '../components/Pusula'
 import InfoBox from '../components/InfoBox'
@@ -22,18 +22,58 @@ const oldData = [
     },
 ];
 
-const oldData = [
-    
-];
 
+String.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10); // don't forget the second param
+    var hours = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours < 10) { hours = "0" + hours; }
+    if (minutes < 10) { minutes = "0" + minutes; }
+    if (seconds < 10) { seconds = "0" + seconds; }
+    return minutes + ':' + seconds;
+}
 
 export default function Index() {
+    const [data, setData] = useState(null);
+
+    const [seconds, setSeconds] = useState(0);
+
+
+
 
     useEffect(() => {
-        axios.post(`http://localhost/onnawater/api.php?action=l`).then(res => {
-            console.log(res)
-        })  
+   
+
+        const intervalId = setInterval(() => {
+            setSeconds(prev => prev + 1);
+            console.log(1)
+        }, 1000)
+
+
+        return () => {
+            // Clear interval using intervalId
+            // This function run when component unmount
+            clearInterval(intervalId)
+        }
     }, [])
+
+    useEffect(()=>{
+        if(seconds == 5){
+            setSeconds(0)
+        }
+
+        if(seconds == 0){
+            setData(null)
+            axios.post(`http://localhost/onnawater/api.php?action=l`).then(res => {
+                console.log(res)
+                setData(res.data)
+            })
+        }
+    },[seconds])
+
+
 
 
     return (
@@ -57,19 +97,19 @@ export default function Index() {
                                 <div className='space-y-3.5'>
                                     <InfoBox
                                         title={"Akıntı"}
-                                        value={20}
+                                        value={data ? data.fspeed : ''}
                                         unit={"knot"}
                                     />
 
                                     <InfoBox
                                         title={"SICAKLIK"}
-                                        value={20}
+                                        value={data ? data.temp : ''}
                                         unit={"°"}
                                     />
 
                                     <InfoBox
                                         title={"DERİNLİK"}
-                                        value={-20}
+                                        value={20}
                                         unit={"M"}
                                     />
                                 </div>
@@ -77,7 +117,7 @@ export default function Index() {
 
                             <div>
 
-                                <Pusula derece={110} />
+                                <Pusula derece={data ? data.fdirection : 0} />
                                 <InfoBox
                                     className={"mt-[49px]"}
                                     title={"VOLTAJ"}
@@ -95,18 +135,19 @@ export default function Index() {
                             <InfoBox
                                 className={"SONRAKİ VERİ"}
                                 title={"SONRAKİ VERİ"}
-                                value={"16:49"}
+                                value= {seconds.toString().toHHMMSS()}
                                 unit={""}
                             >
-                                <LoadingBar level={23} />
+                                <LoadingBar level={ (seconds / 5) * 100 } />
                             </InfoBox>
                         </div>
 
                     </div>
+                   
                     <iframe src="https://api.wo-cloud.com/content/widget/?geoObjectKey=13097769&language=tr&region=TR&timeFormat=HH:mm&windUnit=kmh&systemOfMeasurement=metric&temperatureUnit=celsius" name="CW2" scrolling="no" height="192" frameborder="0" className='border-4 mt-2 border-gri w-full'></iframe>
                 </div>
                 <div className="orta">
-                    <MainImg image={"https://i.natgeofe.com/n/dde3c72a-7612-451e-9796-5498d6386a04/yourshot-underwater-1869254_16x9.jpg"} />
+                    <MainImg image={data != null ? `https://onnarobotics.com/Onna360/assets/underwater/${data.timestamp}.jpg` : ''} />
                 </div>
                 <div className="sag px-3">
                     <div className="text-white/60 font-bold mb-2 text-lg">ESKİ VERİLER</div>
