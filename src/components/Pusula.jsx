@@ -2,7 +2,7 @@ import React from 'react'
 
 function Pusula({derece}) {
     return (
-        <div className="relative">
+        <div className="relative ">
             <div className="absolute left-[50%] translate-x-[-50%] top-[-10px] text-slate-400 font-bold text-xl">N</div>
             <div className="absolute left-[50%] translate-x-[-50%] bottom-[-12px] text-slate-400 font-bold text-xl">S</div>
             <div className="absolute top-[60%] left-[-5px] translate-y-[-50%] bottom-[-12px] text-slate-400 font-bold text-xl">W</div>

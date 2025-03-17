@@ -5,29 +5,29 @@ import InfoBox from '../components/InfoBox'
 import LoadingBar from '../components/LoadingBar'
 import OldDataBox from '../components/OldDataBox'
 import MainImg from '../components/MainImg'
-import axios from 'axios'
+import axios from 'axios';
+import { imgUrl } from "../data"
+import { useParams } from 'react-router-dom'
 
-const oldData = [
-    {
-        image: "https://www.vacationstravel.com/wp-content/uploads/2019/04/deepdiscoveriesfeature.jpg",
-        tarih: "13 Ağustos 2024 20:59"
-    },
-    {
-        image: "https://t3.ftcdn.net/jpg/05/71/26/62/360_F_571266253_7HuXAuQKNPOEaFt44faa37kLl8rccQq7.jpg",
-        tarih: "13 Ağustos 2024 20:59"
-    },
-    {
-        image: "https://images.photowall.com/products/56871/underwater-scene.jpg?h=699&q=85",
-        tarih: "13 Ağustos 2024 20:59"
-    },
-];
-
-
+const dates = [
+    "Ocak",
+    "Şubat",
+    "Mart",
+    "Nisan",
+    "Mayıs",
+    "Haziran",
+    "Temmuz",
+    "Ağustos",
+    "Eylül",
+    "Ekim",
+    "Kasım",
+    "Aralık",
+]
 String.prototype.toHHMMSS = function () {
-    var sec_num = parseInt(this, 10); // don't forget the second param
+    var sec_num = parseInt(this, 10); 
     var hours = Math.floor(sec_num / 3600);
     var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60)
 
     if (hours < 10) { hours = "0" + hours; }
     if (minutes < 10) { minutes = "0" + minutes; }
@@ -35,21 +35,35 @@ String.prototype.toHHMMSS = function () {
     return minutes + ':' + seconds;
 }
 
+
+
+
 export default function Index() {
     const [data, setData] = useState(null);
-
-    const [seconds, setSeconds] = useState(0);
-
-
+    const [oldData, setOldData] = useState(null);
+    const [dataCount, setDataCount] = useState(1);
 
 
+    let { id } = useParams();
     useEffect(() => {
-   
+        console.log(id)
+        axios.post(`api.php?action=l&device=${id}`).then(res => {
+            console.log(res)
+            setData(res.data)
+        })
 
         const intervalId = setInterval(() => {
-            setSeconds(prev => prev + 1);
-            console.log(1)
-        }, 1000)
+            axios.post(`api.php?action=l&device=${id}`).then(res => {
+                console.log(res)
+                setData(res.data)
+            })
+        }, 60000)
+
+        axios.get(`api.php?action=old&device=${id}`).then(res => {
+       
+            console.log(res.data)
+            setOldData(res.data)
+        })
 
 
         return () => {
@@ -59,72 +73,66 @@ export default function Index() {
         }
     }, [])
 
-    useEffect(()=>{
-        if(seconds == 5){
-            setSeconds(0)
-        }
-
-        if(seconds == 0){
-            setData(null)
-            axios.post(`http://localhost/onnawater/api.php?action=l`).then(res => {
-                console.log(res)
-                setData(res.data)
-            })
-        }
-    },[seconds])
-
-
-
 
     return (
         <>
 
             <Header />
 
-            <div className="main-grid mt-5">
-                <div className="sol px-3">
+            <div className="main-grid mt-5 in">
+                <div className="sol relative top-[-36px] px-3">
                     <div className="text-white/60 font-bold mb-2 text-lg">VERİLER</div>
 
-
-                    <div className="hidden gap-2 text-green-500 items-center">
-                        <i className="fa-solid text-xl fa-power-off"></i>
-                        <div className="text-xl font-medium">Sistem Etkin</div>
+                    <div className='flex animate-pulse py-3 border-b-8 bg-red-200 border gap-2 border-red-500 w-full justify-center items-center'>
+                        <img src='s.svg' className='w-[40px] ' />
+                        <div className='font-bold text-red-500 text-3xl'>Sinyal Yok</div>
                     </div>
-                    <div className="mt-2 border-4 p-2 border-gri">
 
+                    <div className='mt-2 flex border-t-4 border-gri'>
+                        <div onClick={e => {
+                            setDataCount(1)
+                        }} className={`${dataCount == 1 ? 'derinlik-tab-active' : ''}  font-bold  border-gri border-l-4 text-xl flex-fill py-2 px-2 derinlik-tab  text-white`}>9 <span className='text-base'>M</span></div>
+                        <div onClick={e => {
+                            setDataCount(2)
+                        }} className={`${dataCount == 2 ? 'derinlik-tab-active' : ''} in font-bold  border-gri border-l-4 text-xl flex-fill py-2 px-2 derinlik-tab  text-white`}>11 <span className='text-base'>M</span></div>
+                        <div onClick={e => {
+                            setDataCount(3)
+                        }} className={`${dataCount == 3 ? 'derinlik-tab-active' : ''} in font-bold  border-r-4 border-gri border-l-4 text-xl flex-fill py-2 px-2 derinlik-tab  text-white`}>13 <span className='text-base'>M</span></div>
+                    </div>
+
+                    
+                    <div className="relative  border-x-4 border-b p-2 border-gri">
                         <div className="flex items-start justify-between pr-2 pt-2">
                             <div>
                                 <div className='space-y-3.5'>
                                     <InfoBox
+                                        title={"DERİNLİK"}
+                                        value={data ? data["depth" + dataCount] : ''}
+                                        unit={"M"}
+                                    />
+
+
+                                    <InfoBox
+                                        className={"in"}
                                         title={"Akıntı"}
-                                        value={data ? data.fspeed : ''}
+                                        value={'< 1.5'}
                                         unit={"knot"}
                                     />
 
                                     <InfoBox
+
                                         title={"SICAKLIK"}
-                                        value={data ? data.temp : ''}
+                                        value={data ? parseFloat(data.temp).toFixed(2) : ''}
                                         unit={"°"}
                                     />
 
-                                    <InfoBox
-                                        title={"DERİNLİK"}
-                                        value={20}
-                                        unit={"M"}
-                                    />
                                 </div>
                             </div>
 
                             <div>
 
-                                <Pusula derece={data ? data.fdirection : 0} />
-                                <InfoBox
-                                    className={"mt-[49px]"}
-                                    title={"VOLTAJ"}
-                                    value={12.2}
-                                    unit={"V"}
-                                >
-                                </InfoBox>
+                                <Pusula derece={data ? data["fdirection" + dataCount] : 0} />
+
                             </div>
 
 
@@ -133,29 +141,33 @@ export default function Index() {
 
                         <div className="mt-3">
                             <InfoBox
-                                className={"SONRAKİ VERİ"}
-                                title={"SONRAKİ VERİ"}
-                                value= {seconds.toString().toHHMMSS()}
-                                unit={""}
+                                className={""}
+                                title={"SON VERİ"}
+                                value={data ? `${data.timestamp.substring(6, 8)} ${dates[parseInt(data.timestamp.substring(4, 6)) - 1]} ${data.timestamp.substring(0, 4)} ${data.timestamp.substring(9, 11)}:${data.timestamp.substring(11, 13)}` : ""}
+
                             >
-                                <LoadingBar level={ (seconds / 5) * 100 } />
                             </InfoBox>
                         </div>
-
                     </div>
-                   
-                    <iframe src="https://api.wo-cloud.com/content/widget/?geoObjectKey=13097769&language=tr&region=TR&timeFormat=HH:mm&windUnit=kmh&systemOfMeasurement=metric&temperatureUnit=celsius" name="CW2" scrolling="no" height="192" frameborder="0" className='border-4 mt-2 border-gri w-full'></iframe>
+                    <iframe src="https://api.wo-cloud.com/content/widget/?geoObjectKey=13097769&language=tr&region=TR&timeFormat=HH:mm&windUnit=kmh&systemOfMeasurement=metric&temperatureUnit=celsius" name="CW2" scrolling="no" height="192" frameBorder="0" className='border-4 mt-2 border-gri w-full'></iframe>
+                
                 </div>
                 <div className="orta">
-                    <MainImg image={data != null ? `https://onnarobotics.com/Onna360/assets/underwater/${data.timestamp}.jpg` : ''} />
+                    <MainImg image={data != null ? imgUrl + data.device_id + "/" + data.timestamp + ".jpg" : ''} />
                 </div>
-                <div className="sag px-3">
+                <div className="sag px-3 relative top-[-36px]">
                     <div className="text-white/60 font-bold mb-2 text-lg">ESKİ VERİLER</div>
-                    {oldData.map((val, key) => {
+                    {oldData && oldData.map((val, key) => {
                         return (
                             <OldDataBox
-                                image={val.image}
-                                tarih={val.tarih}
+                                speed={val["fspeed" + dataCount]}
+                                degree={val.temp}
+                                direction={val["fdirection" + dataCount]}
+                                depth={parseInt(val["depth" + dataCount])}
+                                key={key}
+                                dates={dates}
+                                image={imgUrl + val.device_id + "/" + val.timestamp + ".jpg"}
+                                tarih={val.timestamp}
                             />)
                     })}
 

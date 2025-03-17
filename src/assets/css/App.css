@@ -14,6 +14,16 @@ body {
   display: none !important;
 }
 
+.in{
+  animation: in .5s;
+}
+
+@keyframes in {
+    from{
+      opacity: 0;
+    }
+}
+
 .main-grid {
   display: grid;
   grid-template-columns: 20% 1fr 20%;
@@ -29,7 +39,32 @@ body {
   border-color: #2f4e67;
 }
 
+
+
+.bg-gri{
+  background-color: #2f4e67;
+}
+
 .gdark{
   background: rgb(0,0,0);
 background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6923144257703081) 72%, rgba(0,0,0,0.3337710084033614) 100%);
+}
+
+.derinlik-tab:hover{
+  background: rgb(47,78,103);
+background: linear-gradient(180deg, rgba(47,78,103,1) 29%, rgba(47,78,103,0) 100%);
+}
+
+.derinlik-tab{
+
+  border-bottom: 4px solid #2f4e67;
+  cursor: pointer;
+}
+.derinlik-tab-active{
+  text-align: center;
+  background: rgb(47,78,103);
+  background: linear-gradient(180deg, rgba(47,78,103,1) 29%, rgba(47,78,103,0) 100%);
+  border-bottom: none !important;
+  color: #0085FF !important;
+  cursor: default;
 }
