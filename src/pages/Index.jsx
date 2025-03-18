@@ -154,6 +154,8 @@ export default function Index() {
                 </div>
                 <div className="orta">
                     <MainImg image={data != null ? imgUrl + data.device_id + "/" + data.timestamp + ".jpg" : ''} />
+
+                    <div className='text-3xl text-center mt-2 font-semibold text-white'>Sistem şu anda bakımdadır.</div>
                 </div>
                 <div className="sag px-3 relative top-[-36px]">
                     <div className="text-white/60 font-bold mb-2 text-lg">ESKİ VERİLER</div>
